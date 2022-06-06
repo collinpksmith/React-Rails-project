@@ -29,8 +29,8 @@ const Recipe = (props) => {
 
   let ingredientList = "No ingredients available";
 
-  if (recipe?.ingredients?.length > 0) {
-    ingredientList = recipe?.ingredients
+  if (recipe && recipe.ingredients && recipe.ingredients.length > 0) {
+    ingredientList = recipe.ingredients
       .split(",")
       .map((ingredient, index) => (
         <li key={index} className="list-group-item">
@@ -38,10 +38,31 @@ const Recipe = (props) => {
         </li>
       ));
   }
-  const recipeInstruction = addHtmlEntities(recipe?.instruction);
+  const recipeInstruction = addHtmlEntities(recipe && recipe.instruction);
+
+  const handleDelete = () => {
+    const url = `/api/v1/destroy/${params.id}`;
+    const token = document.querySelector('meta[name="csrf-token"]').content;
+
+    fetch(url, {
+      method: "DELETE",
+      headers: {
+        "X-CSRF-Token": token,
+        "Content-Type": "application/json"
+      }
+    })
+      .then(response => {
+        if (response.ok) {
+          return response.json();
+        }
+        throw new Error("Network response was not ok.");
+      })
+      .then(() => navigate("/recipes"))
+      .catch(error => console.log(error.message));
+  }
 
   return (
-    <div className="">
+    <div className="container">
       <div className="hero position-relative d-flex align-items-center justify-content-center">
         <img
           src={recipe.image}
@@ -70,7 +91,7 @@ const Recipe = (props) => {
             />
           </div>
           <div className="col-sm-12 col-lg-2">
-            <button type="button" className="btn btn-danger">
+            <button className="btn btn-danger" onClick={handleDelete}>
               Delete Recipe
             </button>
           </div>
